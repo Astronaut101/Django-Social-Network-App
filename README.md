@@ -494,4 +494,116 @@ To summarize, we have implemented the mode relationships between our users and o
 * Extend the Django **user model** with a custom `Profile` model
 * Customize the `Django admin` interface
 
-## [TBC] - Part 2 : Building a Django Front End with Bulma
+## Part 2 : Building a Django Front End with Bulma
+
+### Objectives Part 2
+
+* Integrate **Bulma CSS** and **style** our app
+* Use **template inheritace** to reduce repetition
+* Structure Django templates in a **folder hierarchy**
+* Build **routing and view functions**
+* **Interlink** pages of our app using **dynamic URLs**
+
+### Project Overview Part 2
+
+* [ ] - Step 4 : Creating a Base Template with Bulma
+* [ ] - Step 5 : List All user Profiles
+* [ ] - Step 6 : Access Individual Profile Pages
+
+### Create a Base Template with Bulma
+
+**NOTE**: Having a fundamental understanding of how we can make our website projects look decent without too much effort goes a long way.
+
+#### Create a Base Template
+
+```[html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF=8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="with=device-width, initial-scale=1.0">
+    <title>Dwitter</title>
+</head>
+<body>
+    <section>
+        <h1>Dwitter</h1>
+        <p>Your tiny social network built with Django</p>
+    </section>
+    <div>
+        {% block content %}
+
+        {% endblock content %}
+    </div>
+</body>
+</html>
+```
+
+#### View Your Base Template
+
+To make Django render and display our base template, we'll need to set up URL routing and a view function. We now open our primary `urls.py` file in the management app that we called `social`, then route requests that point to the base URL forward to our `dwitter` app:
+
+```[python]
+from django.contrib import admin
+from django.urls import path
+from django.urls import include
+
+
+urlpatterns = [
+    path("", include("dwitter.urls")),
+    path('admin/', admin.site.urls),
+]
+```
+
+Later, we'll change the code in the respective file above to distribute incoming requests further.
+
+**NOTE**: By default, Django apps don't come with their own `urls.py` files. However, it's best to create a URL configuration for each app in our Django project and [include them in our main URLconf](https://docs.djangoproject.com/en/3.2/topics/http/urls/#including-other-urlconfs). For each new app, we'll need to create a new `urls.py` file.
+
+After we have created our `dwitter/urls.py`, we can now add the necessary functional code. This time, without needing to handle the `/admin` route. Catch the incoming request to the base URL that gets redirected to this file and send it to a new function called `dashboard`
+
+```[python]
+# dwitter/urls.py
+
+from django.urls import path
+from .views import dashboard
+
+app_name = "dwitter"
+
+urlpatterns = [
+    path("", dashboard, name="dashboard"),
+]
+```
+
+We will be running through a helpful error message that tells all about what we are missing:
+
+```[python]
+ImportError: cannot import name 'dashboard' from 'dwitter.views' (C:\Users\creyes24\Real-World-Python\django-projects\django_social_network\dwitter\views.py)
+```
+
+Next stop would be to create the `dashboard()` function in `views.py` in order for the main project folder to be linking to your app url.
+
+```[python]
+# ./dwitter/views.py
+
+from django.shortcuts import render
+
+# Create your views here.
+def dashboard(request):
+    return render(request, "base.html")
+```
+
+With the `dashboard()`, we're pointing the incoming request to `base.html` and telling Django to render that template.
+
+```[python]
+(social) C:\Users\creyes24\Real-World-Python\django-projects\django_social_network>py manage.py runserver
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+August 18, 2022 - 21:53:17
+Django version 3.2.5, using settings 'social.settings'
+Starting development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+```
+
+#### [TBC] - Adding a Bulma CSS to our Base Template
