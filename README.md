@@ -606,4 +606,64 @@ Starting development server at http://127.0.0.1:8000/
 Quit the server with CTRL-BREAK.
 ```
 
-#### [TBC] - Adding a Bulma CSS to our Base Template
+#### Adding a Bulma CSS to our Base Template
+
+We will use the CSS framework [Bulma](https://bulma.io/) to handle the CSS rules for us. We will make the Bulma CSS stylesheet available to all of our templates. A quick way to do it is by adding a link to the stylesheet file, which is hosted on a [content delivery network (CDN)](https://en.wikipedia.org/wiki/Content_delivery_network), to our base template's `<head>` element:
+
+```[html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF=8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="with=device-width, initial-scale=1.0">
+    <!-- Adding our Bulma CSS Framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <title>Dwitter</title>
+</head>
+<body>
+    <section>
+        <h1>Dwitter</h1>
+        <p>Your tiny social network built with Django</p>
+    </section>
+    <div>
+        {% block content %}
+
+        {% endblock content %}
+    </div>
+</body>
+</html>
+```
+
+We are now going to continue to improve the look of our page by employing pre-made classes defined in our stylesheet.
+
+```[html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF=8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="with=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <title>Dwitter</title>
+</head>
+<body>
+    <section class-"hero is-small is-primary mb-4">
+        <div class="hero-body">
+            <h1 class="title is-1">Dwitter</h1>
+            <p class="subtitle is-4">Your tiny social network built with Django</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="columns">
+            {% block content %}
+
+            {% endblock content %}
+        </div>
+    </div>
+</body>
+</html>
+```
+
+### [TBC] Step 5: Listing all User Profiles on the Front End of Our Django App
