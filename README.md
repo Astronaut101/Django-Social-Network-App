@@ -6,19 +6,19 @@ A four-part tutorial series from [Real Python](https://realpython.com/django-soc
 
 We will implement the project in a series of steps spread out over four parts.
 
-🎈 **Part1: Models and Relationships**
+🎈 **[Part 1: Models and Relationships](#part-1-models-and-relationships)**
 
 * Step 1: Set Up the Base Project
 * Step 2: Extend the Django User Model
 * Step 3: Implement a Post-Save Hook
 
-✨ **Part 2: Templates and Front-End Styling**
+✨ **[Part 2: Templates and Front-End Styling](#part-2--building-a-django-front-end-with-bulma)**
 
 * Step 4: Create a Base Template with Bulma
 * Step 5: List All user profiles
 * Step 6: Access Individual Profile Pages
 
-🎉 **Part 3: Follows and Dweets**
+🎉TBC **[Part 3: Follows and Dweets](#part-3---build-and-handle-post-requests-in-django)**
 
 * Step 7: Follow and Unfollow Other Profiles
 * Step 8: Create the Back-End Logic For Dweets
@@ -30,13 +30,13 @@ We will implement the project in a series of steps spread out over four parts.
 * Step 11: Prevent Double Submissions and Handle Errors
 * Step 12: Improve the Front-End User Experience
 
-## Part 1
+## Part 1: Models and Relationships
 
 ### Objectives
 
-* [ ] - Implement **one-to-one** and **many-to-many** relationships between Django **models**
-* [ ] - Extend the **Django user model** with a custom `Profile` model
-* [ ] - Customize the **Django admin interface**.
+* [x] - Implement **one-to-one** and **many-to-many** relationships between Django **models**
+* [x] - Extend the **Django user model** with a custom `Profile` model
+* [x] - Customize the **Django admin interface**.
 
 ### Project Planning
 
@@ -277,7 +277,7 @@ admin.site.unregister(Group)
 
 **NOTE**: `inlines` is a list that can take multiple entries, but in this case, we only want to add one.
 
-However, after combining our User and Profile model in an Inline fashion, our profile names are currently hard to interpret. How should we know that _Profile object (1)_ is the user profile of _admin?_. 
+However, after combining our User and Profile model in an Inline fashion, our profile names are currently hard to interpret. How should we know that _Profile object (1)_ is the user profile of _admin?_.
 
 In order to solve that dilemma, we would update our `./dwitter/models.py` and add a `.__str__()` method to `Profile`:
 
@@ -506,7 +506,7 @@ To summarize, we have implemented the mode relationships between our users and o
 
 ### Project Overview Part 2
 
-* [ ] - Step 4 : Creating a Base Template with Bulma
+* [x] - Step 4 : Creating a Base Template with Bulma
 * [ ] - Step 5 : List All user Profiles
 * [ ] - Step 6 : Access Individual Profile Pages
 
@@ -648,7 +648,7 @@ We are now going to continue to improve the look of our page by employing pre-ma
     <title>Dwitter</title>
 </head>
 <body>
-    <section class-"hero is-small is-primary mb-4">
+    <section class="hero is-small is-primary mb-4">
         <div class="hero-body">
             <h1 class="title is-1">Dwitter</h1>
             <p class="subtitle is-4">Your tiny social network built with Django</p>
@@ -666,4 +666,403 @@ We are now going to continue to improve the look of our page by employing pre-ma
 </html>
 ```
 
-### [TBC] Step 5: Listing all User Profiles on the Front End of Our Django App
+### Step 5: Listing all User Profiles on the Front End of Our Django App
+
+At this point, we can inherit from our base template, which links our style scaffolding through Bulma. We will follow the flow of a request through the Django Web framework and write the code that we'll need piece by piece.
+
+#### Write the routes and code logic
+
+| Topic          | File Location              |
+|----------------|----------------------------|
+| Routing        | urls.py                    |
+| Logic          | views.py                   |
+| Representation | html files in `templates/` |
+
+We will next pick-up requests that go through `/profile_list` in `dwitter/urls.py` and take it from there:
+
+```[python]
+from django.urls import path
+
+from .views import dashboard
+from .views import profile_list
+
+app_name = "dwitter"
+
+urlpatterns = [
+    path("", dashboard, name="dashboard"),
+    path("profile_list/", profile_list, name="profile_list")
+]
+
+```
+
+From our code snippet above, we're telling Djnago that we want to route requests that come to `/profile_list` to view the function called `profile_list()`.
+
+**NOTE**: The names of our **URL slug and the view function don't need to match**, but it **makes sense to name them the same to keep our code clearer and more straightforward to debug**.
+
+Next, we will add the `profile_list()` function to our `dwitter/views.py` file:
+
+```[python]
+# ./dwitter/views.py
+
+from django.shortcuts import render
+
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    return render(request, "base.html")
+
+def profile_list(request):
+    profiles = Profile.objects.exclude(user=request.user)
+    return render(request, "dwitter/profile_list.html", {"profiles": profiles})
+```
+
+From the code snippet above, we're defining the view function that'll handle all requests to the `/profile_list` URL slug:
+
+* We have used Django's Object-Relational Mapper (ORM) to [retrieve objects](https://docs.djangoproject.com/en/3.2/topics/db/queries/#retrieving-objects) from our profile table and store them in `profiles`. We want to get all user profiles except for our own, which we can accomplish with [`.exclude()`](https://docs.djangoproject.com/en/3.2/ref/models/querysets/#exclude)
+
+* When we return a call to `render()`, we pass a string for the template we want to render a context dictionary that contains `profiles`.
+
+In short, we have fetched all user profiles except for our own from our database and send that information onwards to a template with the path `dwitter/profile_list.html`
+
+#### Write the Profile List Template
+
+**NOTE**: The reason why we're creating this second `dwitter/` folder is to avoid complications with templates from other apps we might  add to our project in the future. Learn more about [Django's Double-Folder Structure](https://www.youtube.com/watch?v=bydSXmg5GR8). **Don't forget to naviate through the `/profile_list` domain of your web app to check if profile_list.html is working.
+
+```[html]
+<!-- dwitter/templates/dwitter/profile_list.html -->
+
+{% for profile in profiles %}
+
+<div>
+    <p>{{ profile.user.username }}</p>
+    <p>@{{ profile.user.username|lower }}</p>
+</div>
+
+{% endfor %}
+```
+
+Now it's time to add more Bulma-specific HTML structure and classes to improve the look and feel of our profile pages.
+
+```[html]
+<!-- dwitter/templates/dwitter/profile_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+{% for profile in profiles %}
+
+    <div class="block">
+        <div class="card">
+            <a href="#">
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-left">
+                            <figure class="image is-48x48">
+                                <img src="https://bulma.io/images/placeholders/96x96.png"
+                                     alt="Placeholder image">
+                            </figure>
+                        </div>
+                        <div class="media-content">
+                            <p class="title is-4">
+                                {{ profile.user.username }}
+                            </p>
+                            <p class="subtitle is-6">
+                                @{{ profile.user.username|lower }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+{% endfor %}
+
+</div>
+
+{% endblock content %}
+```
+
+To make the updates happen accordingly, we start by extending `base.html` and wrapping our site-specific HTML into the `{% block content %}` tag. This structure allows Django to insert the child template's content into our base template's HTML structure.
+
+We've also implemented the HTML structure for a [Bulma Card](https://bulma.io/documentation/components/card/#) to improve how the profile information for each user appears on our page.
+
+**NOTE** - when navigating to the `<your_local_host>/profile_list`, make sure that you are logged-in with your admin account or in a Production server, logged in as a valid user.
+
+### Step 6: Access Individual Profile Pages
+
+#### Building a Profile Page Template
+
+```[python]
+# dwitter/urls.py
+
+from django.urls import path
+
+from .views import dashboard
+from .views import profile_list
+from .views import profile
+
+app_name = "dwitter"
+
+urlpatterns = [
+    path("", dashboard, name="dashboard"),
+    path("profile_list/", profile_list, name="profile_list"),
+    path("profile/<int:pk>", profile, name="profile"),
+]
+```
+
+With `<int:pk>`, we're indicating that any URL request that goes to `profile/` followed by an integer number should be funneled to the `profile()` view function in `dwitter/views.py`
+
+The `profile()` function takes both Django's `request` object as well as an integer, `pk`. We use `pk` in a call to our database, which allows us to pick a specific profile by its primary key ID. Finally, we return another call to `render()`. Finally, we return another call to `render()` and instruct Django to send the gathered profile object to a template named `dwitter/profile.html`
+
+**NOTE**: In our tutorial series, we're keeping the names and locations of our template files consistent with the structure that's used in the tutorial on [Django User Management](https://realpython.com/django-user-management/). This would help us have a helpful resource to help us implement a proper front-end facing authentication flow for the Django project.
+
+Since we have also implemented the `follows` field in our back-end code logic, which means that we can now display all the profiles that a user is following:
+
+```[html]
+<!-- dwitter/templates/dwitter/profile.html -->
+
+<ul>
+{% for following in profile.follows.all %}
+    <li>{{ following }}</li>
+{% endfor %}
+</ul>
+```
+
+The following code snippet above describes the following:
+
+* **profile** - the variable that we're passing in our context dictionary to `render()` in `profile()`. It holds the information that we pulled from our database about a user profile.
+
+* **.follows** - gives us access to the `ManyRelatedManager` object, which holds all the user profiles that the current profile follows.
+
+* **.all** - fetches all those user profile instances and allows us to iterate over them.
+
+#### Exercise - Add Follower List
+
+Try to display the list of all the profiles that follow the user whose profile page you're on.
+
+**Answer:**
+
+```[html]
+<!-- dwitter/templates/dwitter/profile.html -->
+
+<ul>
+{% for following in profile.follows.all %}
+    <li>{{ following }}</li>
+{% endfor %}
+</ul>
+
+<ul>
+{% for followers in profile.followed_by.all %}
+    <li>{{ followers }}</li>
+{% endfor %}
+</ul>
+```
+
+The `related_name` value that we have passed in our `Profile` model of `models.ManyToManyField()`, we're setting the name that we can use to refer to **connected objects in the reverse direction**.
+
+**NOTE**: Keep in mind that we set the user-to-user relationships as asymmetrical, which means that a user can follow someone else's profile without them following that user.
+
+It's highly encouraged that you write your own version of how you want your profile pages to look. But for now, we will follow the Real Python author's html design that uses Bulma's [columns](https://bulma.io/documentation/columns/), [blocks](https://bulma.io/documentation/elements/block/), and [titles](https://bulma.io/documentation/elements/title/):
+
+```[html]
+<!-- dwitter/templates/dwitter/profile.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+    <div class="block">
+        <h1 class="title is-1">
+            {{profile.user.username|upper}}'s Dweets
+        </h1>
+    </div>
+
+</div>
+
+<div class="column is-one-third">
+
+    <div class="block">
+        <a href="#">
+            <button class="button is-dark is-outlined is-fullwidth">
+                All Profiles
+            </button>
+        </a>
+    </div>
+
+    <div class="block">
+        <h3 class="title is-4">
+            {{profile.user.username}} follows:
+        </h3>
+        <div class="content">
+            <ul>
+            {% for following in profile.follows.all %}
+                <li>
+                    <a href="#">
+                        {{ following }}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="block">
+        <h3 class="title is-4">
+            {{profile.user.username}} follows:
+        </h3>
+        <div class="content">
+            <ul>
+            {% for followers in profile.followed_by.all %}
+                <li>
+                    <a href="#">
+                        {{ followers }}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}
+```
+
+If we go to `http://127.0.0.1:8000/profile/1`, for example, then we can access a profile page on our localhost. The downside for the IDs is that we need to keep on guessing the ID of a user profile if we want to see the actual user's profile page. That's why we need to link the profile pages from our profile list page.
+
+### Link the Profile Pages
+
+We will now add a link to the profile pages for each profile displayed in `profile_list.html`
+
+**NOTE**: If we want to learn more about dynamic linking in Django and the URL template tag, you can watch the lesson about URL Linking using `app_name`, `path names`, and `arguments`
+
+We will replace all the '#' symbols from our `<a>` tags with `{% url %}` tag that links to individual profile page:
+
+```[html]
+<!-- dwitter/templates/dwitter/profile_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+{% for profile in profiles %}
+
+    <div class="block">
+        <div class="card">
+            <a href="{% url 'dwitter:profile' profile.id %}">
+                <div class="card-content">
+                    <div class="media">
+                        <div class="media-left">
+                            <figure class="image is-48x48">
+                                <img src="https://bulma.io/images/placeholders/96x96.png"
+                                     alt="Placeholder image">
+                            </figure>
+                        </div>
+                        <div class="media-content">
+                            <p class="title is-4">
+                                {{ profile.user.username }}
+                            </p>
+                            <p class="subtitle is-6">
+                                @{{ profile.user.username|lower }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+{% endfor %}
+
+</div>
+
+{% endblock content %}
+```
+
+Based from the code block above, when we update the `href` attribute in this way, we link to the `path()` call with the name `profile` in our `dwtter` app's **namespace** and pass the `.id` value of each profile as an argument:
+
+* **{% url %}** : The URL template tag in Django allows you to create dynamic links to different endpoints of your web app.
+
+* **`dwitter.profile`** : This part of the template tag defines the namespace of our app (`dwitter`) and the path name (`profile`) that we want our link to redirect to.
+
+* **`profile.id`**
+
+We need to navigate as well to the overall profile list. To round off the user experience, we will also add a `{% url %}` tag to the `href` attribute of the link containing the button in our profile page view so that it links back to the profile list:
+
+```[html]
+<!-- dwitter/templates/dwitter/profile.html -->
+
+<div class="block">
+    <a href="{% url 'dwitter:profile_list' %}">
+        <button class="button is-dark is-outlined is-fullwidth">
+            All Profiles
+        </button>
+    </a>
+</div>
+```
+
+#### Exercise : Linking our Connections
+
+```[html]
+...
+<div class="block">
+        <h3 class="title is-4">
+            {{profile.user.username}} follows:
+        </h3>
+        <div class="content">
+            <ul>
+            {% for following in profile.follows.all %}
+                <li>
+                    <a href="{% url 'dwitter:profile' following.id %}">
+                        {{ following }}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="block">
+        <h3 class="title is-4">
+            {{profile.user.username}} followed by:
+        </h3>
+        <div class="content">
+            <ul>
+            {% for followers in profile.followed_by.all %}
+                <li>
+                    <a href="{% url 'dwitter:profile' followers.id %}">
+                        {{ followers }}
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+```
+
+To recap, we added two `{% url %}` tags to `profile.html`. Both of them follow the same structure:
+
+* **Namespace**: The namespace `dwitter:profile` allows Django to redirect to `profile()` in views.py
+* **Argument**: The argument, which is either `following.id` or `followers.id`, will be passed on to `profile()`, which uses it to pull the user profile from the database.
+
+### Conclusion
+
+We have learned how to:
+
+* Integrate **Bulma CSS** to **style** our app
+* Use **template inheritance8** to reduce repetition
+* Structure Django templates in a **folder hierarchy**
+* Build **routing** and **view functions**
+* **Interlink** pages of our app using **dynamic URLs**.
+
+## Part 3 - Build and Handle POST Requests in Django

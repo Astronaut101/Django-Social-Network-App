@@ -3,3 +3,4 @@
 dwitter/__pycache__/*
 dwitter/migrations/__pycache__/*
 social/__pycache__/*
+config.ini
