@@ -1066,3 +1066,16 @@ We have learned how to:
 * **Interlink** pages of our app using **dynamic URLs**.
 
 ## Part 3 - Build and Handle POST Requests in Django
+
+Objectives for the third part of our tutorial series, we will learn how to:
+
+* Create the **front-end interface** to let users **follow** and **unfollow** profiles.
+* Submit and **handle a POST request** in Django using buttons.
+* Set up the model for our text-based content.
+* **Build styled templates** to display content on the front end.
+* Use intricate **model relationships** in template code.
+
+### Step 7: Follow and Unfollow Other Profiles
+
+#### [TBC] - Adding Buttons to our Profiles
+ 
