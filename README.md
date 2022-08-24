@@ -1077,5 +1077,113 @@ Objectives for the third part of our tutorial series, we will learn how to:
 
 ### Step 7: Follow and Unfollow Other Profiles
 
-#### [TBC] - Adding Buttons to our Profiles
- 
+#### Adding Buttons to our Profiles
+
+```[html]
+<div class="column">
+
+    <div class="block">
+        <h1 class="title is-1">
+            {{profile.user.username|upper}}'s Dweets
+        </h1>
+    </div>
+    <div class="buttons has-addons">
+        <button class="button is-success">Follow</button>
+        <button class="button is-danger">Unfollow</button>
+    </div>
+
+</div>
+```
+
+We could add some distinction in our buttons, wherein we could gray out the irrelevant button so that the relevant action will be more apparent for our users. Bulma should render our buttons grayed-out if we add an HTML class called `is-static`.
+
+We can apply the class depending on whether or not the logged-in user is lready following the profile that they're viewing.
+
+### Handling POST Requests in Django Code Logic
+
+```[html]
+    <form method="post">
+        {% csrf_token %}
+        <div class="buttons has-addons">
+            {% if profile in user.profile.follows.all %}
+                <button class="button is-success is-static">Follow</button>
+                <button class="button is-danger" name="follow" value="unfollow">
+                    Unfollow
+                </button>
+            {% else %}
+                <button class="button is-success" name="follow" value="follow">
+                    Follow
+                </button>
+                <button class="button is-danger is-static">Unfollow</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+```
+
+We have a few essential changes to our template by updating our `profile.html` source code:
+
+* We have wrapped our two 'Follow' and 'Unfollow' buttons in an HTML `<form>` element and added the HTML attribute `method` with the value `"post"` to clarify that we'll send data with this form.
+* We added a [CSRF token](https://docs.djangoproject.com/en/3.2/ref/csrf/) that Django conveniently provides. We neeed to add this for security reasons if we want to allow our users to submit forms in our Django app.
+* We added two HTML attributes to both `<button>` elements:
+
+1. [name](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-name) defines what key we'll use to access the value in our view function. We set this key to `"follow"` for both buttons.
+2. [value](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-value) defines what value the form will send to our view function under the key name defined in `name` when we press one of the buttons.
+
+```[python]
+# dwitter/views.py
+
+# ...
+
+def profile(request, pk):
+    profile = Profile.objects.get(pk=pk)
+    if request.method == "POST":
+        current_user_profile = request.user.profile
+        data = request.POST
+        action = data.get("follow")
+        if action == "follow":
+            current_user_profile.follows.add(profile)
+        elif action == "unfollow":
+            current_user_profile.follows.remove(profile)
+        current_user_profile.save()
+    return render(request, "dwitter/profile.html", {"profile": profile})
+```
+
+Based from our code update above in `views.py`:
+
+* We introduce a conditional check to see whether the incoming request to our Django view function is an HTTP POST request. This will only be the case if someone submitting the form on profile.html by clicking either the *Follow* or *Unfollow* button.
+* We have used the user attribute from Django's `request` object, which refers to the currently logged-in user, to access that user's `.profile` object and assign it to `current_user_profile`
+* We get the user-submitted data from the `request.POST` dictionary and store it in `data`. Django puts data in `request.POST` when a user submits a form with the attribute `method="post"`.
+* We have retrieved the submitted value by accessing the data at the key `"follow"`, which we have defined in our template with the `name` HTML attribute on our `<button>` elements.
+* We use `.save()` on our `current_user_profile` to propagate the changes to `.follows` back to the database.
+
+**NOTE**: Just in case we haven't created profiles for you and for our existing users may run into an `RelatedObjectDoesNotExist` error when performing the POST request. In order to prevent this error, we can verify that our user has a profile in our `profile` view:
+
+```[python]
+# dwitter/views.py
+
+# ...
+
+def profile(request, pk):
+    if not hasattr(request.user, 'profile'):
+        missing_profile = Profile(user=request.user)
+        missing_profile.save()
+
+    profile = Profile.objects.get(pk=pk)
+    if request.method == "POST":
+        current_user_profile = request.user.profile
+        data = request.POST
+        action = data.get("follow")
+        if action == "follow":
+            current_user_profile.follows.add(profile)
+        elif action == "unfollow":
+            current_user_profile.follows.remove(profile)
+        current_user_profile.save()
+    return render(request, "dwitter/profile.html", {"profile": profile})
+```
+
+When we call the `profile` view, we first check whether `request.user` contains `profile` with [hasattr](https://docs.python.org/3/library/functions.html#hasattr). If the profile is missing, then we create a profile for our user before proceeding.
+
+With this updates so far, we have fully connected the follow and unfollow back-end logic with the front end. We added an HTML `<form>` element and two buttons in `profile.html`. We have also implemented the code logic in `profile()` that translates the button presses into changes that affect our database.
+
+### [TBC] Step 8 - Create the Back-end Logic for Dweets
