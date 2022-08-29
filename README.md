@@ -8,27 +8,29 @@ We will implement the project in a series of steps spread out over four parts.
 
 🎈 **[Part 1: Models and Relationships](#part-1-models-and-relationships)**
 
-* Step 1: Set Up the Base Project
-* Step 2: Extend the Django User Model
-* Step 3: Implement a Post-Save Hook
+* [Step 1: Set Up the Base Project](#setting-up-the-base-project)
+* [Step 2: Extend the Django User Model](#extending-the-django-user-model)
+* [Step 3: Implement a Post-Save Hook](#implement-a-post-save-hook)
 
 ✨ **[Part 2: Templates and Front-End Styling](#part-2--building-a-django-front-end-with-bulma)**
 
-* Step 4: Create a Base Template with Bulma
-* Step 5: List All user profiles
-* Step 6: Access Individual Profile Pages
+* [Step 4: Create a Base Template with Bulma](#create-a-base-template-with-bulma)
+* [Step 5: List All user profiles](#step-5-listing-all-user-profiles-on-the-front-end-of-our-django-app)
+* [Step 6: Access Individual Profile Pages](#step-6-access-individual-profile-pages)
 
-🎉TBC **[Part 3: Follows and Dweets](#part-3---build-and-handle-post-requests-in-django)**
+🎉**[Part 3: Follows and Dweets](#part-3---build-and-handle-post-requests-in-django)**
 
-* Step 7: Follow and Unfollow Other Profiles
-* Step 8: Create the Back-End Logic For Dweets
-* Step 9: Display Dweets on the Front End
+* [Step 7: Follow and Unfollow Other Profiles](#step-7-follow-and-unfollow-other-profiles)
+* [Step 8: Create the Back-End Logic For Dweets](#step-8---create-the-back-end-logic-for-dweets)
+* [Step 9: Display Dweets on the Front End](#step-9-display-dweets-on-the-front-end)
 
-🎁 **Part 4: Forms and Submissions**
+🎁 **[Part 4: Forms and Submissions](#part-04---build-and-submit-html-forms-with-django)**
 
-* Step 10: Submit Dweets Through a Django Form
-* Step 11: Prevent Double Submissions and Handle Errors
-* Step 12: Improve the Front-End User Experience
+* [Step 10: Submit Dweets Through a Django Form](#step-10---submit-dweets-using-django-forms)
+* [Step 11: Prevent Double Submissions and Handle Errors](#step-11---prevent-double-submissions-and-handle-errors)
+* [Step 12: Improve the Front-End User Experience](#step-12---improve-the-front-end-user-experience)
+
+✍ **[Next Steps](#next-steps)**
 
 ## Part 1: Models and Relationships
 
@@ -1097,7 +1099,7 @@ Objectives for the third part of our tutorial series, we will learn how to:
 
 We could add some distinction in our buttons, wherein we could gray out the irrelevant button so that the relevant action will be more apparent for our users. Bulma should render our buttons grayed-out if we add an HTML class called `is-static`.
 
-We can apply the class depending on whether or not the logged-in user is lready following the profile that they're viewing.
+We can apply the class depending on whether or not the logged-in user is already following the profile that they're viewing.
 
 ### Handling POST Requests in Django Code Logic
 
@@ -1124,7 +1126,7 @@ We can apply the class depending on whether or not the logged-in user is lready 
 We have a few essential changes to our template by updating our `profile.html` source code:
 
 * We have wrapped our two 'Follow' and 'Unfollow' buttons in an HTML `<form>` element and added the HTML attribute `method` with the value `"post"` to clarify that we'll send data with this form.
-* We added a [CSRF token](https://docs.djangoproject.com/en/3.2/ref/csrf/) that Django conveniently provides. We neeed to add this for security reasons if we want to allow our users to submit forms in our Django app.
+* We added a [CSRF token](https://docs.djangoproject.com/en/3.2/ref/csrf/) that Django conveniently provides. We need to add this for security reasons if we want to allow our users to submit forms in our Django app.
 * We added two HTML attributes to both `<button>` elements:
 
 1. [name](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#attr-name) defines what key we'll use to access the value in our view function. We set this key to `"follow"` for both buttons.
@@ -1186,4 +1188,616 @@ When we call the `profile` view, we first check whether `request.user` contains 
 
 With this updates so far, we have fully connected the follow and unfollow back-end logic with the front end. We added an HTML `<form>` element and two buttons in `profile.html`. We have also implemented the code logic in `profile()` that translates the button presses into changes that affect our database.
 
-### [TBC] Step 8 - Create the Back-end Logic for Dweets
+### Step 8 - Create the Back-end Logic for Dweets
+
+**NOTE**: The type of content that our users post could have been anything! Our focus was only on the connections between users of our app. Now we're getting specific. If we wanted to allow a different form of content in our social network, we'd need to branch off in another direction at this point.
+
+#### Making the Model
+
+```[python]
+class Dweet(models.Model):
+    user = models.ForeignKey(
+        User, related_name="dweets", on_delete=models.DO_NOTHING
+    )
+    body = models.CharField(max_length=140)
+    created_at = models.DateTimeField(auto_now_add=True)
+```
+
+Our `Dweet` model needs only 3 fields:
+
+1. **user**: We define the model to be in a foreign jey relationship, which means that each dweet will be associated with a user. We also pass `"dweets"` to `related_name`, which allows us to access the dweet objects from the user side of the relationship through `.dweets`. Finally, we specify the orphaned dweets should stick around by setting `on_delete` to `models.DO_NOTHING`
+2. **body**: Defines our content type and we have set a character field limit to a maximum length of 140 characters.
+3. **created_at**: The final field of our new model records the date and time when the text-based message is submitted. Setting `auto_now_add` to `True` on a `DateTimeField` object ensures that this value gets automatically updated when a user submits a sweet.
+
+```[python]
+(social) C:\Users\Clarence Vinzcent\Real-World-Python\Django-Projects\Django-Social-Network-App>py manage.py makemigrations && migrate
+Migrations for 'dwitter':
+  dwitter\migrations\0002_dweet.py
+    - Create model Dweet
+'migrate' is not recognized as an internal or external command,
+operable program or batch file.
+
+(social) C:\Users\Clarence Vinzcent\Real-World-Python\Django-Projects\Django-Social-Network-App>py manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, dwitter, sessions
+Running migrations:
+  Applying dwitter.0002_dweet... OK
+```
+
+#### Adding Dweets Through the Admin Interface
+
+In our dweets functionality, we would be testing the functionality of creating dweets through our admin interface. We are going to register our new `Dweet` model in our admin interface.
+
+```[python]
+...
+from .models import Profile
+
+...
+
+admin.site.register(Dweet)
+```
+
+**NOTE** : We need to assign an existing user object to the sweet that we want to create.
+
+After creating our `dweets`, *Dweet object (1)* isn't an exceedingly descriptive name for the submitted dweet.
+
+```[pytohn]
+class Dweet(models.Model):
+    user = models.ForeignKey(
+        User, related_name="dweets", on_delete=models.DO_NOTHING
+    )
+    body = models.CharField(max_length=140)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (
+            f"{self.User} "
+            f"({self.created_at:%Y-%m-%d %H:%M}): "
+            f"{self.body[:30]}..."
+        )
+```
+
+**NOTE** : We should create a couple of dweets and assign them to different users of our app. We have created at least 3 users and that they all have a few example dweets so that we can see which dweets show up when we follow or unfollow profiles.
+
+As a conclusion to this step, we created a new model for the text content of our Django social network, registered it in our admin interface, and improved how Django displays the objects. In the next section, we'll add the code to tell Django to show these dweets on the front end of our web app.
+
+### Step 9: Display Dweets on the Front End
+
+#### Displaying Personal Dweets on Each Profile Page
+
+The name that we defined in our `Dweet` model gives us reverse access to the associated `User` Model.
+
+```[python]
+profile.user.dweets
+```
+
+```[html]
+  <div class="content">
+        {% for dweet in profile.user.dweets.all %}
+            <div class="box">
+                {{ dweet.body }}
+                <span class="is-small has-text-grey-light">
+                    ({{ dweet.created at }})
+                </span>
+            </div>
+        {% endfor %}
+    </div>
+```
+
+The iteration works after stepping through our model relationships, and we can view the dweets of the current user in a pleasant way thanks to Bulma's Stylesheet!
+
+We're still missing a way to display a feed of all the dweets of all the profiles we follow. We implement this functionality by updating our dashboard view.
+
+#### Create a Dashboard View
+
+On our dashboard, we want to be able to do two things:
+
+1. Read all dweets from the profiles we follow.
+2. Submit a dweet.
+
+```[html]
+{% comment %} dwitter/templates/dwitter/dashboard.html {% endcomment %}
+
+{% for followed in user.profile.follows.all %}
+    {% for dweet in followed.user.dweets.all %}
+        <li>{{dweet.user.username}} ({{ dweet.created_at }}): {{ dweet.body }}</li>
+    {% endfor %}
+{% endfor %}
+```
+
+Before we proceed any further by applying Bulma's styling, it's worth to revisit first the model relationships that we're chaining together in our Django template:
+
+* We dive into the `user` object that Django sends with every POST or GET request. It refers to the logged-in user, currently our admin user. With `.profile`, we access the profile of our admin user, which we set up when we extended the Django User Model. The profile has an attribute called `.follows` that holds a collection of all the user profiles that this profile follows. Finally, with `.all`, we access an iterable of that collection.
+* We nest another `for` loop into the previous one. Here, we access `followed` to get at each user profile that the currently logged-in user follows.
+* We now have access to each dweet in `dweet`. We will use that to pick out the information we want from each text-based message and assemble this information in a single HTML list item.
+
+Time to buff up `dashboard.html` so that it fits with the design of the rest of our social network!
+
+```[html]
+{% comment %} dwitter/templates/dwitter/dashboard.html {% endcomment %}
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+    {% for followed in user.profile.follows.all %}
+        {% for dweet in followed.user.dweets.all %}
+            <div class="box">
+                {{ dweet.body }}
+                <span class="is-small has-text-grey-ligt">
+                    ({{ dweet.created_at }}) by {{ dweet.user.username }}
+                </span>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+{% endblock content %}
+```
+
+By extending our base template and adding some styling through Bulma's CSS classes, we have created an attractive dashboard page that shows our feed displaying all the dweets of all the profiles we follow. Each user will see their own personal feed of dweets, based on which profiles they follow.
+
+To wrap-up this step, we added a new dashboard template that displays a personal feed of dweets, and we also added code to `profile.html` that shows each user's dweets on their profile page.
+
+### Conclusion Part 03
+
+In the process of building this project, we have learned how to:
+
+* Create the **front-end interface** to **follow and unfollow** profiles
+* Submit and handle a **POST request** in Django using **buttons**
+* Set up the **model** for our text-based content
+* Build **styled templates** to display content on the front end
+* Use intricate **model relationships** in template code
+
+## Part 04 - Build and submit HTML Forms with Django
+
+In the fourth part of the tutorial series, we'll learn how to:
+
+* Create and render **Django forms** from our `Dweet` model
+* **Prevent double submissions** and **display helpful error messages**
+* **Interlink** pages of our app using **dynamic URLs**
+* **Refactor** a view function
+* Using **`QuerySet`** **field lookups** to **filter** our data on the back end
+
+### Step 10 - Submit Dweets Using Django Forms
+
+In this specific tutorial series, we decided early on to handle usr creation in our Django admin. Our tiny social network is invite-only, and we're the one who decides to create user accounts.
+
+**NOTE**: Feel free to expand on this with [Django's user management system](https://realpython.com/django-user-management/) and build the necessary templates by following the linked tutorial.
+
+Once we have our users get into our social network app, we'll want to give them the opportunity to create content.
+
+#### Create a Text Input Form
+
+We'll learn how to create HTML forms using a **Django Form**.
+
+```[python]
+# ./dwitter/forms.py
+
+from django import forms
+from .models import Dweet
+
+
+class DweetForm(forms.ModelForm):
+    body = forms.CharField(required=True)
+
+    class Meta:
+        model = Dweet
+        exclude = ("user",)
+```
+
+Creating forms like the code snippet above relies heavily on abstractions set up by Django, which means that we need to define very little by ourselves to get a working form.
+
+* We have created a [`Meta` options](https://docs.djangoproject.com/en/3.2/topics/db/models/#meta-options) class in `DweetForm`. This options class allows us to pass any information that isn't a field to our form class.
+* We need to define which model `ModelForm` should take its information from. Because we want to make a form that allows users to create dweets, `Dweet` is the right choice here.
+* By adding the name of the model field that we want to exclude to the `exclude` tuple, we ensure that Django will omit it when creating the form.
+
+We want to make the dweet submissions as user-friendly as possible. Users can only dweet on our social network when they're logged in, and they can only create dweets for themselves. Therefore, *we don't need to explicitly pass which user is sending a dweet inside the form*.
+
+**NOTE**: Associating a dweet to a user is necessary, but we'll handle that in the back end instead.
+
+#### Render the Form in Your Template
+
+```[python]
+# ./dwitter/views.py
+
+from django.shortcuts import render
+
+from .forms import DweetForm
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    form = DweetForm()
+    return render(request, "dwitter/dashboard.html", {"form": form})
+...
+```
+
+```[html]
+<!-- dwitter/templates/dwitter/dashboard.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+    {% for followed in user.profile.follows.all %}
+        {% for dweet in followed.user.dweets.all %}
+            <div class="box">
+                {{ dweet.body }}
+                <span class="is-small has-text-grey-ligt">
+                    ({{ dweet.created_at }}) by {{ dweet.user.username }}
+                </span>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+<div class="column is-one-third">
+    {{ form.as_p }}
+</div>
+
+{% endblock content %}
+```
+
+We can improve the display of our Django form by adding customizations through a **widget** to `forms.CharField` in `forms.py`.
+
+```[python]
+# ./dwitter/forms.py
+
+from django import forms
+from .models import Dweet
+
+
+class DweetForm(forms.ModelForm):
+    body = forms.CharField(
+        required=True,
+        widget=forms.widgets.Textarea(
+            attrs={
+                "placeholder": "Dweet something...",
+                "class": "textarea is-primary is-medium",
+            }
+        ),
+        label="",
+    )
+
+    class Meta:
+        model = Dweet
+        exclude = ("user",)
+```
+
+By adding a [Django widget](https://docs.djangoproject.com/en/3.2/ref/forms/widgets/) to `CharField`, we get to control how the HTML input element will be represented:
+
+* We choose the type of input element that Django should use and set it to Textarea. The `Textarea` widget will render as an [HTML `<textarea>` element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea), which offeres more space for our users to enter their dweets.
+* We set the `label` to an empty string (""), which removes the *Body* text that previously showed up due to a Django default setting that renders the name of a form field as its label.
+
+#### Make Form Submissions Possible
+
+To create a functional form that allows POST requests, we'll also need to define the HTTP method accordingly:
+
+```[html]
+<!-- dwitter/templates/dwitter/dashboard.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+    {% for followed in user.profile.follows.all %}
+        {% for dweet in followed.user.dweets.all %}
+            <div class="box">
+                {{ dweet.body }}
+                <span class="is-small has-text-grey-ligt">
+                    ({{ dweet.created_at }}) by {{ dweet.user.username }}
+                </span>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+</div>
+
+<div class="column is-one-third">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="button is-primary is-fullwidth is-medium mt-5"
+                type="submit">
+            Dweet
+        </button>
+    </form>
+</div>
+
+{% endblock content %}
+```
+
+With another incremental update to our HTML code, we completed the front-end setup of our dweet submission form:
+
+* We wrapped the form code in an HTML `<form>` element with `method` set to `"post"` because we want to send the user-submitted messages via a POST request.
+
+What happens when we click the *Dweet* button? Not much, because we haven't set up any code logic to complement our front-end code yet. Here's the submit functionality shown in our `views.py`:
+
+```[python]
+# ./dwitter/views.py
+
+from django.shortcuts import render
+
+from .forms import DweetForm
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    if request.method == "POST":
+        form = DweetForm(request.POST)
+        if form.is_valid():
+            dweet = form.save(commit=False)
+            dweet.user = request.user
+            dweet.save()
+    form = DweetForm()
+    return render(request, "dwitter/dashboard.html", {"form": form})
+```
+
+With some additions to `dashboard()`, we make if possible for our view to handle the submitted data and create new dweets in our database. We have one issue that we need to address. If we write a dweet and submit it now, it gets added and if we reload the page after submitting, the same dweet will get added again!
+
+#### Step 11 - Prevent Double Submissions and Handle Errors
+
+After posting a dweet, Django sends another POST request with the same data and creates another entry in our database if *we reload the page*. Django will keep making duplicate dweets as often as we keep reloading. We don't want that to happen!
+
+#### Prevent Double Submissions
+
+To avoid double dweet submissions, we'll have to **prevent our app from keeping the request data around**, so that a *reload* won't have a change to resubmit the data. We can do just that by using a [Django Redirect](https://realpython.com/django-redirects/):
+
+```[python]
+from django.shortcuts import render
+from django.shortcuts import redirect
+
+from .forms import DweetForm
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    if request.method == "POST":
+        form = DweetForm(request.POST)
+        if form.is_valid():
+            dweet = form.save(commit=False)
+            dweet.user = request.user
+            dweet.save()
+            return redirect("dwitter:dashboard")
+    form = DweetForm()
+    return render(request, "dwitter/dashboard.html", {"form": form})
+```
+
+When we have imported `redirect()`, we're sending a GET request, which means that any number of page reloads will only ever show the dweets that already exist instead of creating an army of cloned dweets.
+
+We set up our redirect path by referencing the `app_name` variable and the name keyword argument of a `path()`, which we have defined in our URL configuration:
+
+* **"dwitter"** is the `app_name` variable that describes the namespace of our app. We can find it before the colon (:) in the string argument passed to `redirect()`
+* **"dashboard"** is the value of the `name` keyword argument for the `path()` entry that points to `dashboard()`. We need to add it after the colon (:) in string argument passed to `redirect()`
+
+```[python]
+# dwitter/urls.py
+
+from django.urls import path
+
+from .views import dashboard
+from .views import profile_list
+from .views import profile
+
+app_name = "dwitter"
+
+urlpatterns = [
+    path("", dashboard, name="dashboard"),
+    ...
+]
+```
+
+With `urls.py` set up as shown above, we can use `redirect()` to point our users back to their dashboard page with a GET request after successfully processing the POST request from their form submission.
+
+When we don't give a proper error message to our users that our dweet has already gone beyond the 140 character limit, then the text we have already entered has already disappeared as well. Better to make this user experience better for our users by notifying them about what they did wrong and keeping the text they entered!
+
+#### Handle Submission Errors
+
+We could use the Django forms rendered with `{{ form.as_p }}` to display error messages that get sent along with the form object without needing to add any code. These error messages can improve the user experience significantly.
+
+Why we can't see error messages? We take another look at `dashboard()`:
+
+```[python]
+from django.shortcuts import render
+from django.shortcuts import redirect
+
+from .forms import DweetForm
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    if request.method == "POST":
+        form = DweetForm(request.POST)
+        if form.is_valid():
+            dweet = form.save(commit=False)
+            dweet.user = request.user
+            dweet.save()
+            return redirect("dwitter:dashboard")
+    form = DweetForm()
+    return render(request, "dwitter/dashboard.html", {"form": form})
+```
+
+We can see that we're creating one of two different `DweetForm` objects, either [a bound or an unbound form](https://docs.djangoproject.com/en/3.2/ref/forms/api/#ref-forms-api-bound-unbound). Inspecting the code above:
+
+* If our function gets called from a POST request, we instantiate `DweetForm` with the data that came along with the request. Django creates a **bound form** that hass access to data and can get validated.
+* If our page gets called with a GET request, we're instantiating an **unbound form** that doesn't have any data associated with it.
+
+We should validate the bound form, and if the validation passes, the dweet gets written to our database. However, if a user adds to many characters, then our form validation fails, and the code in our conditional statement doesn't get executed. Our `dashboard()` view function jumps to overwrite `form` with an empty unbound `DweetForm` object. Since we overwrote the bound form that held the information about the validation error with an unbound form, Django won't display any of the validation errors that occured.
+
+In order to send the bound form to the template if a validation error orccurs:
+
+```[python]
+from django.shortcuts import render
+from django.shortcuts import redirect
+
+from .forms import DweetForm
+from .models import Profile
+
+
+# Create your views here.
+def dashboard(request):
+    form = DweetForm(request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            dweet = form.save(commit=False)
+            dweet.user = request.user
+            dweet.save()
+            return redirect("dwitter:dashboard")
+    return render(request, "dwitter/dashboard.html", {"form": form})
+```
+
+**NOTE** : Python Boolean `or` operator is a **short-circuit** operator. This means that it only evaluates the second argument if the first one if `False`, or falsy.
+
+* **POST request**: IF we call `dashboard()` with a POST request that includes any data, the `request.POST` [`QueryDict`](https://docs.djangoproject.com/en/3.2/ref/request-response/#django.http.QueryDict) will contain our form submission data. The `request.POST` object now has a **truthy** value, and Python will short-circuit the `or` operator to return the value of `request.POST`. This way, we'll pass the form content as an argument when instantiating `DweetForm`, as we did previously with `form = DweetForm(request.POST)`.
+* **GET request**: If we call `dashboard()` with a GET request, `request.POST` will be empty, which is a **falsy** value. Python will continue evaluating the `or` expression and return the second value, `None`. Therefore, Django will instantiate `DweetForm` as an unbound form object, like we previously did with `form = DweetForm()`.
+
+The advantage of this setup is that we now pass the bound form to our template even when the form validation fails, which allows Django's `{{ form.as_p }}` to render a descriptive error message for our users out of the box:
+
+**NOTE**: We didn't need to add any HTML to our template to make this change. Django knows how to render form submission errors when they get sent along in a bound form object inside the {{ form.is_p }} tag.
+
+The best thing about this certain change is that we're passing the bound form object that retains the text data that our user entered in the form. No data is lost, and they can use the helpful suggestions to edit their dweet and submit it to the database successfully.
+
+#### Step 12 - Improve the Front-End User Experience
+
+#### Improving the Navigation
+
+Our social network has 3 different pages that our users might want to visit at different times:
+
+1. The empty URL path (/) points to the dashboard page.
+2. The `/profile_list` URL path points to the list of profiles.
+3. The `/profile/<int>` URL path points to a specific user's profile page.
+
+We will be adding two buttons in our `dashboard.html` that will allow our users to navifate to different pages in our app:
+
+1. The profile list page
+2. Their personal profile page
+
+#### Sorting the Dweets
+
+There are a couple of ways that we could sort the dweets, and a few places where we could do that, namely:
+
+1. In our model
+2. In our view function
+3. In our template
+
+Our take on handling the sorting of the user's dweets from latest to oldest, wherein we specify the ordering option in our `Dweet` model class that orders our list of queries from its most recent to its oldest dweet.
+
+```[python]
+# ./dwitter/models.py
+
+class Dweet(models.Model):
+    user = models.ForeignKey(
+        User, related_name="dweets", on_delete=models.DO_NOTHING
+    )
+    body = models.CharField(max_length=140)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    # We can set our ordering in our model class.
+    # This will be the default ordering for the object, for use
+    # when obtaining lists of objects. 
+    class Meta:
+        ordering = ['-created_at']
+
+
+    def __str__(self):
+        return (
+            f"{self.user} "
+            f"({self.created_at:%Y-%m-%d %H:%M}): "
+            f"{self.body[:30]}..."
+        )
+```
+
+In our view functions, we can use Django ORM calls with modifiers to get precisely the dweets we're looking for. We will fetch all the dweets from all the profiles that a user follows right inside our view function. Then we'll sort them by date and time and pass a new sorted iterable named dweet to our template.
+
+```[python]
+# ./dwitter/views.py
+
+from django.shortcuts import render
+from django.shortcuts import redirect
+
+from .forms import DweetForm
+from .models import Profile
+from .models import Dweet
+
+
+# Create your views here.
+def dashboard(request):
+    form = DweetForm(request.POST or None)
+    if request.method == "POST":
+        if form.is_valid():
+            dweet = form.save(commit=False)
+            dweet.user = request.user
+            dweet.save()
+            return redirect("dwitter:dashboard")
+
+    followed_dweets = Dweet.objects.filter(
+        user__profile__in=request.user.profile.follows.all()
+    ).order_by("-created_at")
+    return render(
+        request, 
+        "dwitter/dashboard.html", 
+        {"form": form, "dweets": followed_dweets},
+    )
+```
+
+Some key Django concepts based from our code snippet above:
+
+* In our `user__profile__in`, this signifies that our Django ORM syntax for the main part of a SQL WHERE clause. We can follow through database relations with a double-underscore syntax (__) specific to Django ORM. We write `user__profile__in` to access the profile of a user and see whether that profile is in a collection that we'll pass as thevalue to our field lookup keyword argument.
+
+We can now update the template in `dashboard.html` to reflect these changes and reduce the amount of code logic that we need to write in our template, effectively getting rid of our nested for loop:
+
+```[html]
+<!-- dwitter/templates/dwitter/dashboard.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="column">
+
+    {% for dweet in dweets  %}
+        <div class="box">
+            {{ dweet.body }}
+            <span class="is-small has-text-grey-ligt">
+                ({{ dweet.created_at }}) by {{ dweet.user.username }}
+            </span>
+        </div>
+    {% endfor %}
+
+</div>
+```
+
+We've made the pre-selected and pre-sorted dweets available to our template under the name `dweets`. Now we can iterate over that `QuerySet` object with a single `for` loop and access the dweets attributes without needing to step through any model relationships in our template.
+
+### conclusion Part 04
+
+In the process of building this project, we've learned how to:
+
+* Build a **Django Project** from start to finish.
+* Implement `OneToOne` and `ForeignKey` relationships between Django **models**
+* Extend the Django **user model** with a custom `Profile` model
+* Customize the **Django admin** interface
+* Integrate **Bulma CSS** to **style** our app.
+
+## Next Steps
+
+We can keep improving our Django social network to add functionality and make it even more impressive. Here are some ideas to take our Social Media Project to the next level:
+
+* **Implement User Authentication**: Allow new users to sign up through the front end of our web app by following the steps outlined in [Get Started with Django Part 2: Django User Management](https://realpython.com/django-user-management/)
+* **Deploying our Dwitter Project**: Put our web app online for the whole world to see by [hosting our Django project on Heroku](https://realpython.com/django-hosting-on-heroku/)
+* **Get social!**: Invite our friends to join our Django social network, and start dweeting thoughts to one another.
+* **Adding a delete dweet functionality**

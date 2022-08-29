@@ -37,3 +37,27 @@ def create_profile(sender, instance, created, **kwargs):
         
 # Previous method without using the decorator @receiver
 # post_save.connect(create_profile, sender=User)
+
+
+class Dweet(models.Model):
+    user = models.ForeignKey(
+        User, related_name="dweets", on_delete=models.DO_NOTHING
+    )
+    body = models.CharField(max_length=140)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    # Option 02
+    # We can set our ordering in our model class.
+    # This will be the default ordering for the object, for use
+    # when obtaining lists of objects. 
+    # class Meta:
+    #     ordering = ['-created_at']
+
+
+    def __str__(self):
+        return (
+            f"{self.user} "
+            f"({self.created_at:%Y-%m-%d %H:%M}): "
+            f"{self.body[:30]}..."
+        )
