@@ -1,6 +1,8 @@
 .venv
 .vscode
-dwitter/__pycache__/*
-dwitter/migrations/__pycache__/*
-social/__pycache__/*
+**/__pycache__/
+# dwitter/__pycache__/
+# dwitter/migrations/__pycache__/
+# social/__pycache__/
+# users/__pycache__/
 config.ini
