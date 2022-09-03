@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,7 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'dwitter',
     'users',
+    'crispy_forms',
+    'crispy_bulma',
 ]
+
+# Custom Form Templates
+CRISPY_ALLOWED_TEMPLATE_PACKS = ('bulma',)
+CRISPY_TEMPLATE_PACK = "bulma"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,7 +64,7 @@ ROOT_URLCONF = 'social.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [Path(BASE_DIR) / Path('users/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,3 +133,8 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django has a convenience method of changing the default redirection 
+# of a certain web page.
+LOGIN_REDIRECT_URL = "users:signin_dashboard"
+LOGOUT_REDIRECT_URL = "users:signin_dashboard"

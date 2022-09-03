@@ -1,0 +1,31 @@
+<!--users/templates/registration/login.html-->
+
+{% extends 'base_login.html' %}
+
+{% block content %}
+
+    {% load crispy_forms_tags %}
+
+        <div class="hero is-halfheight">
+            <div class="hero-body is-justify-content-center is-align-items-center">
+                <div class="columns is-flex-direction-column box">
+                    
+                    <h2 class="title is-4">Login 🖋</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <hr>
+                        <p class="control">
+                            <input class="button is-success" type="submit" value="Login">
+                            <button class="button is-info" onclick="location.href='{% url 'users:signin_dashboard'%}';">
+                            Cancel
+                            </button>
+                        </p>
+                    </form>
+                    
+                </div>
+            </div>
+        </div>
+
+
+{% endblock %}

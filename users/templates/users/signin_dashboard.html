@@ -1,0 +1,28 @@
+<!-- users/templates/users/signin_dashboard.html -->
+
+{% extends 'base_login.html' %}
+
+{% block content %}
+
+    <div class="hero-body is-justify-content-center is-align-items-center">
+
+        <div class="columns is-flex is-flex-direction-column box">
+            <div class="container has-text-centered">
+                <p class="subtitle is-3">
+                    Hello, <strong>{{ user.username|default:'Guest' }}</strong>! 👋
+                <p>
+            </div>
+        
+            <div class="container has-text-centered">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'users:logout' %}"><strong>Logout</strong></a>
+                    <a href="{% url 'users:password_change' %}"><strong>Change password</strong></a>
+                {% else %}
+                    <a href="{% url 'users:login' %}"><strong>Login</strong></a>
+                {% endif %}
+            </div>
+        </div>
+        
+    </div>
+
+{% endblock %}
