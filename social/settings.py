@@ -43,10 +43,13 @@ INSTALLED_APPS = [
     'users',
     'crispy_forms',
     'crispy_bulma',
+    'fontawesomefree',
 ]
 
 # Custom Form Templates
+
 CRISPY_ALLOWED_TEMPLATE_PACKS = ('bulma',)
+
 CRISPY_TEMPLATE_PACK = "bulma"
 
 MIDDLEWARE = [
@@ -136,5 +139,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Django has a convenience method of changing the default redirection 
 # of a certain web page.
+
 LOGIN_REDIRECT_URL = "users:signin_dashboard"
+
 LOGOUT_REDIRECT_URL = "users:signin_dashboard"
+
+# Activating Settings for spinning-up a live email server to test if 
+# it will receive messages.
+
+EMAIL_HOST = "localhost"
+
+EMAIL_PORT = 1025

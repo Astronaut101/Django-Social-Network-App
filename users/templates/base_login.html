@@ -1,4 +1,5 @@
 <!-- users/templates/base_login.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +9,8 @@
     <!-- Using the Latest Bulma CSS stylesheet -->
     <link rel="stylesheet" 
             href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
+    <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">
     <title>Admin Panel</title>
     <style>
         label, input {
@@ -29,6 +32,22 @@
             </div>
         </div>
     </section>
+
+    <script>
+
+        function LoginSubmit() {
+            document.getElementById("LoginUser").submit();
+        }
+
+        function ResetSubmit() {
+            document.getElementById("ResetUser").submit();
+        }
+
+        function ChangePasswordSubmit() {
+            document.getElementById("ChangePasswordUser").submit();
+        }
+    
+    </script>
 
     {% block content %}
     {% endblock %}

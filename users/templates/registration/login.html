@@ -11,18 +11,33 @@
                 <div class="columns is-flex-direction-column box">
                     
                     <h2 class="title is-4">Login 🖋</h2>
-                    <form method="post">
+                    <form id="LoginUser" method="post">
                         {% csrf_token %}
                         {{ form|crispy }}
                         <hr>
                         <p class="control">
-                            <input class="button is-success" type="submit" value="Login">
-                            <button class="button is-info" onclick="location.href='{% url 'users:signin_dashboard'%}';">
-                            Cancel
-                            </button>
+                            <a class="button is-success" onclick="LoginSubmit()">
+                                <span class="icon is-small">
+                                    <i class="fa-solid fa-right-to-bracket"></i>
+                                </span>
+                                <span>Login</span>
+                            </a>
+                            <!--<input class="button is-success" type="submit" value="Login">-->
+                            <a class="button is-info" href="{% url 'users:signin_dashboard' %}">
+                                <span class="icon is-small">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </span>
+                                <span>Cancel</span>
+                            </a>
+                            <a class="button is-danger is-outlined" href="{% url 'users:password_reset' %}">
+                                <span class="icon is-small">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                </span>
+                                <span>Reset Password</span>
+                            </a>
                         </p>
                     </form>
-                    
+
                 </div>
             </div>
         </div>

@@ -1801,3 +1801,43 @@ We can keep improving our Django social network to add functionality and make it
 * **Deploying our Dwitter Project**: Put our web app online for the whole world to see by [hosting our Django project on Heroku](https://realpython.com/django-hosting-on-heroku/)
 * **Get social!**: Invite our friends to join our Django social network, and start dweeting thoughts to one another.
 * **Adding a delete dweet functionality**
+
+## Django User Management
+
+Some notes that are important to remember when dealing with Django User Management!
+
+* When testing the Password Reset functionality of your Django App, running a local live server that accepts email messages is the way to go. Run the following command in your terminal:
+
+```[python]
+py -m smtpd -n -c DebuggingServer localhost:1025
+```
+
+Sample email message generated after sending into the local host (using **cvinzreyes@gmail.com**)
+
+```[python]
+---------- MESSAGE FOLLOWS ----------
+b'Content-Type: text/plain; charset="utf-8"'
+b'MIME-Version: 1.0'
+b'Content-Transfer-Encoding: 8bit'
+b'Subject: Password reset on 127.0.0.1:8000'
+b'From: webmaster@localhost'
+b'To: cvinzreyes@gmail.com'
+b'Date: Sun, 04 Sep 2022 16:19:35 -0000'
+b'Message-ID: <166230837534.24728.896738955454107603@LAPTOP-SS9A7TBK>'
+b'X-Peer: ::1'
+b''
+b''
+b"You're receiving this email because you requested a password reset for your user account at 127.0.0.1:8000."
+b''
+b'Please go to the following page and choose a new password:'
+b''
+b'http://127.0.0.1:8000/reset/MQ/bb94wn-a1c59d17588d7f231c210243e399e599/'
+b''
+b'Your username, in case you\xe2\x80\x99ve forgotten: admin'
+b''
+b'Thanks for using our site!'
+b''
+b'The 127.0.0.1:8000 team'
+b''
+------------ END MESSAGE ------------
+```
