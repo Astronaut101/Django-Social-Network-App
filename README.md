@@ -1841,3 +1841,21 @@ b'The 127.0.0.1:8000 team'
 b''
 ------------ END MESSAGE ------------
 ```
+
+After creating your `password_reset_confirm` and `password_reset_complete` forms, make sure to click on the email link that was being send to the test server just like the sample below:
+
+```[python]
+---------- MESSAGE FOLLOWS ----------
+...
+b'http://127.0.0.1:8000/reset/MQ/bba1ca-1cbe8629fddadd7950596420f68ba3f7/'
+b''
+b'Your username, in case you\xe2\x80\x99ve forgotten: admin'
+b''
+b'Thanks for using our site!'
+b''
+b'The 127.0.0.1:8000 team'
+b''
+------------ END MESSAGE ------------
+```
+
+**NOTE**: Django provides a [lot of variables and important security reminders](https://docs.djangoproject.com/en/3.0/topics/auth/default/#django.contrib.auth.views.PasswordResetView) in the email template context that you can use to compose your own messages:
