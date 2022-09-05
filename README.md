@@ -1859,3 +1859,65 @@ b''
 ```
 
 **NOTE**: Django provides a [lot of variables and important security reminders](https://docs.djangoproject.com/en/3.0/topics/auth/default/#django.contrib.auth.views.PasswordResetView) in the email template context that you can use to compose your own messages:
+
+### Register New Users
+
+Django offers the [`UserCreationForms`](https://docs.djangoproject.com/en/3.0/topics/auth/default/#django.contrib.auth.forms.UserCreationForm). It contains all the necessary fields to create a new user. However, it doesn't include an email field.
+
+Sample `CustomUserCreationForm` class created in our `forms.py` file:
+
+```[python]
+# users/forms.py
+
+from django.contrib.auth.forms import UserCreationForm
+
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        fields = UserCreationForm.Meta.fields + ("email",)
+```
+
+The inner class `Meta` keeps additional information about the form and in this case extends `UserCreationForm.Meta`, so almost everything from Django's form will be reused.
+
+The key difference is in the `fields` attribute, which determines the fields that'll be included in the form. Our custom form will use all the fields from `UserCreationForm` and will add the `email` field.
+
+```[python]
+# Create your views here.
+
+from django.contrib.auth import login
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.urls import reverse
+
+from users.forms import CustomUserCreationForm
+
+
+def signin_dashboard(request):
+    return render(request, "users/signin_dashboard.html")
+ 
+
+def register(request):
+    if request.method == "GET":
+        return render(
+            request, "users/register.html",
+            {"form": CustomUserCreationForm}
+        )
+    elif request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect(reverse("users:signin_dashboard"))
+```
+
+Here's the breakdown of the `register()` view:
+
+* If the view is displayed by a browser, then it will be accessed by a `GET` method. In that case, a template called `users/register.html` will be rendered. The last argument of `.render()` is a context, which in this case contains our custom user creation forms.
+* If the form has been submitted, then our view will be accessed by a `POST` method. In that case, Django will attempt to create a user. A new `CustomUserCreationForm` is created using the values submitted to the form, which are contained in the `request.POST` object.
+* If our form is valid, then a new user is created using `form.save()`. Then the user is logged in using `login()`. Then, the user will be then redirected to the dashboard.
+
+**NOTE** - When loading static files such as Javascript, CSS, and HTML, see the [user guide for serving static files](https://docs.djangoproject.com/en/3.2/howto/static-files/) and [serving static files in production](https://docs.djangoproject.com/en/3.2/howto/static-files/).
+
+**NOTE** - Please keep in mind that this is just an example of a registration form. In the real world, we would probably send emails with confirmation links after someone creates a user account, and we would also **display proper error messages if someone tried to register an account that already exists.**
+
+### [TBC] - Send Emails to the outside world

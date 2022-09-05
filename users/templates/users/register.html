@@ -1,0 +1,39 @@
+<!--users/templates/users/register.html-->
+
+{% extends 'base_login.html' %}
+
+{% block content %}
+
+    {% load crispy_forms_tags %}
+
+        <div class="hero is-halfheight">
+            <div class="hero-body is-justify-content-center is-align-items-center">
+                <div class="columns is-flex-direction-column box">
+
+                    <h2 class="title is-4">Register 🐍</h2>
+                    <form id="RegisterUser" method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <hr>
+                        <p class="control">
+                            <a class="button is-success is-outlined" onclick="RegisterUsersSubmit()">
+                                <span class="icon is-small">
+                                    <i class="fa-solid fa-pen-fancy"></i>
+                                </span>
+                                <span>Register</span>
+                            </a>
+                            <!--<input class="button is-success" type="submit" value="Login">-->
+                            <a class="button is-info is-outlined" href="{% url 'users:login' %}">
+                                <span class="icon is-small">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </span>
+                                <span>Back to Login</span>
+                            </a>
+                        </p>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

@@ -11,6 +11,8 @@
             href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
     <link href="{% static 'fontawesomefree/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <!--Custom JS Script files for handling user forms submissions-->
+    <script src="{% static 'auth_func.js' %}"></script>
     <title>Admin Panel</title>
     <style>
         label, input {
@@ -23,7 +25,7 @@
 </head>
 
 <body>
-    <section class="hero is-primary is-medium">
+    <section class="hero is-primary is-small">
         <div class="hero-body">
             <div class="container has-text-centered">
                 <h1 class="title is-1">
@@ -32,26 +34,6 @@
             </div>
         </div>
     </section>
-
-    <script>
-
-        function LoginSubmit() {
-            document.getElementById("LoginUser").submit();
-        }
-
-        function EmailResetSubmit() {
-            document.getElementById("ResetUser").submit();
-        }
-
-        function ChangePasswordSubmit() {
-            document.getElementById("ChangePasswordUser").submit();
-        }
-
-        function PasswordResetSubmit() {
-            document.getElementById("ConfirmPasswordUser").submit();
-        }
-    
-    </script>
 
     {% block content %}
     {% endblock %}
