@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from configparser import ConfigParser
 
@@ -24,6 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 config = ConfigParser()
 config.read("config.ini")
 SECRET_KEY = config["DJANGO-SOCIAL-KEY"]["api_secrets"]
+
+# SAFER AND SECURE WAY TO STORE CREDENTIALS - Learn more on the Django Settings documentation
+# SECRET_KEY = os.environ.get("DWITTER_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -147,6 +151,11 @@ LOGOUT_REDIRECT_URL = "users:signin_dashboard"
 # Activating Settings for spinning-up a live email server to test if 
 # it will receive messages.
 
-EMAIL_HOST = "localhost"
+# EMAIL_HOST = "localhost"
+# EMAIL_PORT = 1025
 
-EMAIL_PORT = 1025
+EMAIL_HOST = "smtp.mailgun.org"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True

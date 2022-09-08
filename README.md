@@ -1920,4 +1920,34 @@ Here's the breakdown of the `register()` view:
 
 **NOTE** - Please keep in mind that this is just an example of a registration form. In the real world, we would probably send emails with confirmation links after someone creates a user account, and we would also **display proper error messages if someone tried to register an account that already exists.**
 
-### [TBC] - Send Emails to the outside world
+### Send Emails to the outside world
+
+Currently our application can only send emails to a local SMTP server so we can read them in the command line. We will use **[Mailgun](https://login.mailgun.com/login/)** to be able to send emails to actual email addresses.
+
+Keep in mind that we should never include any credentials directly in our code. Instead, we must add them as environmental variables and read their values in Python.
+
+We can run a command in setting our environment variable in our windows machine like so:
+
+```[python]
+C:\> set EMAIL_HOST_USER=your_email_host_user
+```
+
+Repeating the same process for `EMAIL_HOST_PASSWORD`, and remember to export the variables in the same terminal window where we have run the Django server. After both variables are updated, update the `settings.py` file:
+
+```[python]
+# ./social/settings.py
+
+EMAIL_HOST = "smtp.mailgun.org"
+EMAIL_PORT = 587
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = True
+```
+
+The values of `EMAIL_HOST` and `EMAIL_PORT` should be the same for all sandbox domains, but we still have to use our own username and password.
+
+To check if it workds, we have to create a new user with our own email address. Go to `http://localhost:8000/admin/` and log in as the admin user. Go to Users and ADD USER. And then after creating the user, navigate to  navigate to `http://localhost:8000/accounts/password_reset/`. Enter your email address and press Send.
+
+**MUST READ**: **[Django Settings documentation](https://docs.djangoproject.com/en/3.2/topics/settings/)**
+
+### [TBC] - Log in with Github
