@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bulma',
     'fontawesomefree',
+    'social_django',
 ]
 
 # Custom Form Templates
@@ -79,6 +80,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # Vital for installing our social django app authenticator
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -155,7 +159,24 @@ LOGOUT_REDIRECT_URL = "users:signin_dashboard"
 # EMAIL_PORT = 1025
 
 EMAIL_HOST = "smtp.mailgun.org"
+
 EMAIL_PORT = 587
+
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+
 EMAIL_USE_TLS = True
+
+# Social authentication specifically with Github
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "social_core.backends.github.GithubOAuth2",
+]
+
+# Setting up our Github keys and secrets based from our environment settings
+
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get("SOCIAL_AUTH_GITHUB_KEY")
+
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")

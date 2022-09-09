@@ -13,5 +13,6 @@ app_name = "users"
 urlpatterns = [
     path("", signin_dashboard, name="signin_dashboard"),
     url(r"^accounts/", include("django.contrib.auth.urls")),
+    url(r"^oauth/", include("social_django.urls")),
     url(r"^register/", register, name="register"),
 ]

@@ -1950,4 +1950,119 @@ To check if it workds, we have to create a new user with our own email address. 
 
 **MUST READ**: **[Django Settings documentation](https://docs.djangoproject.com/en/3.2/topics/settings/)**
 
-### [TBC] - Log in with Github
+### Log in with Github
+
+We have modern websites offer an option to authenticate using social media accounts. One such example is [Google Login](https://realpython.com/flask-google-login/), but in this tutorial we'll learn how to integrate with Github.
+
+#### Setting up Social Authentication
+
+```[python]
+pip install social-auth-app-django
+```
+
+Like any other Django Application, we have to add it to `INSTALLED_APPS`.
+
+```[python]
+# social/settings.py
+...
+INSTALLED_APPS = [
+    "users",
+    "social_django",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+]
+```
+
+Next, we will add two context processors to `social/settings.py`
+
+```[python]
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [Path(BASE_DIR) / Path('users/templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                # Vital for installing our social django app authenticator
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
+            ],
+        },
+    },
+]
+```
+
+After doing that, we will be applying our migrations:
+
+```[python]
+(venv) $ py manage.py migrate
+```
+
+We also need to include the social authentication URLs in our application, just like we did with the ones provided by Django:
+
+```[python]
+# users/urls.py
+
+...
+
+urlpatterns = [
+    url(r"^accounts/", include("django.contrib.auth.urls")),
+    url(r"^dashboard/", dashboard, name="dashboard"),
+    url(r"^oauth/", include("social_django.urls")),
+    url(r"^register/", register, name="register"),
+]
+```
+
+By default, Django settings don't specify authentication backends, and the default backend used by Django is `django.contrib.auth.backends.ModelBackend`.
+
+```[python]
+# social/settings.py
+
+...
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "social_core.backends.github.GithubOAuth2",
+]
+```
+
+The first backend on the list is the default one used by Django. If we don't include it here, then Django won't be able to log in standard users. The second backend is used for Github logins.
+
+```[python]
+    <p class="has-text-centered">
+        <a href="{% url 'users:register' %}">
+            <strong>Register an Account</strong>
+        </a>
+        <strong>|</strong>
+        <a href="{% url 'users:social:begin' 'github' %}">Login with Github</a>
+    </p>
+```
+
+As we can notice above, the new URL uses the namespace `social`. Namespaces are Django's way of organizing URLs in more complex projects.
+
+Using a unique namespace ensures that there will be no conflicts between our application's URLs and the URLs of other applications.
+
+### Create a Github Application
+
+* **[Docs for turning on OAuth in Github with your Django app](https://github.com/settings/applications/new)**
+* **[Building OAuth Apps](https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps)**
+
+After successfully setting up our oauth account in github, we add the values of Client ID and Client Secret to settings the same way you added Mailgun email credentials:
+
+```[python]
+# users/settings.py
+
+SOCIAL_AUTH_GITHUB_KEY = os.environ.get("SOCIAL_AUTH_GITHUB_KEY")
+SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
+```
+
+Test if the Github login page that you have set up works, and it would redirect you back to the Django admin page.
+
+### [TBC] - Select Authentication Backend

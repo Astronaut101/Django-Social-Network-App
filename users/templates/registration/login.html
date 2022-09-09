@@ -46,6 +46,12 @@
             <a href="{% url 'users:register' %}">
                 <strong>Register an Account</strong>
             </a>
+            <strong>
+                |
+            </strong>
+            <a href="{% url 'users:social:begin' 'github' %}">
+                <strong>Login with Github</strong>
+            </a>
         </p>
 
 {% endblock %}
