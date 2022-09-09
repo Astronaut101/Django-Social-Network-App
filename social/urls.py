@@ -20,7 +20,8 @@ from django.conf.urls import url
 
 
 urlpatterns = [
-    url(r"^", include("users.urls", namespace="users")),
+    url(r"^", include('users.urls', namespace='users')),
+    path("oauth/", include('social_django.urls')),
     path("", include('django.contrib.auth.urls')),
     path("", include("dwitter.urls")),
     path('admin/', admin.site.urls),

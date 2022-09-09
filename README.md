@@ -2065,4 +2065,51 @@ SOCIAL_AUTH_GITHUB_SECRET = os.environ.get("SOCIAL_AUTH_GITHUB_SECRET")
 
 Test if the Github login page that you have set up works, and it would redirect you back to the Django admin page.
 
-### [TBC] - Select Authentication Backend
+### Select Authentication Backend
+
+What happens when we have set our Github authentication backend, Django wouldn't know what login / user creation process that it would use. To do that, we replace ther line `user = form.save()` in our registration view:
+
+```[python]
+from django.contrib.auth import login
+# from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.urls import reverse
+
+from users.forms import CustomUserCreationForm
+
+
+def signin_dashboard(request):
+    return render(request, "users/signin_dashboard.html")
+ 
+
+def register(request):
+    if request.method == "GET":
+        return render(
+            request, "users/register.html",
+            {"form": CustomUserCreationForm}
+        )
+    elif request.method == "POST":
+        form = CustomUserCreationForm(request.POST or None)
+        if form.is_valid():
+            # Changing our code line below from 'user = form.save()' into `user = form.save(commit=False)`
+            # to pass in the original login template that our web app is using. 
+            user = form.save(commit=False)
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            user.save()
+            login(request, user)
+            return redirect(reverse("users:signin_dashboard"))
+        else:
+            return redirect(reverse("users:register"))
+```
+
+A user is created from the form like before, but it is not immediately saved thanks to `commit=False`. In the next line of code, a backend is associated with the user, and only then is the user saved to the database. This way, **we can use both normal user creation and social media authentication in the same Django user management system**.
+
+### Conclusion - Django User Management System
+
+We have learned on how to:
+
+* Extend our Django Application with a full set of **user management** features.
+* Adjust the default **Django Templates** to better suit our needs.
+* Using Mailgun to **send password reset emails**.
+* Add an option to **log in with Github**.

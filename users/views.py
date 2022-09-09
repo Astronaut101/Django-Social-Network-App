@@ -22,7 +22,13 @@ def register(request):
     elif request.method == "POST":
         form = CustomUserCreationForm(request.POST or None)
         if form.is_valid():
-            user = form.save()
+            # Changing our code line below from 'user = form.save()' into `user = form.save(commit=False)`
+            # to pass in the original login template that our web app is using. 
+            user = form.save(commit=False)
+            # This code tells Django that we are acknowledging Social Media / Third Party Authentication
+            # and the original Django Authentication.
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            user.save()
             login(request, user)
             return redirect(reverse("users:signin_dashboard"))
         else:
